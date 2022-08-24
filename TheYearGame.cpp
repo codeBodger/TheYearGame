@@ -20,8 +20,8 @@ std::string dic[b] = {
   "0",   // 8
   "2",   // 9
   "2",   //10
-  "-",   //11
-  "√",   //12
+  " -",   //11
+  " √",   //12
   "! ",  //13
   "!! "  //14
 };
@@ -189,7 +189,7 @@ double eval() {
       ops.push(indices[l]);
     }
 
-    // Current token is an binary operator.
+    // Current token is a binary operator.
     else
     {
       // While top of 'ops' has same or greater
@@ -335,11 +335,15 @@ int invalidAt() { //Function to see if the un-decoded array follows the rules an
         closeds++;
         if (next ==  5) { nextBad = true; break; } // (
         if (next>=7 && next<=10) { nextBad = true; break; } // nums
+        if (next == 11) { nextBad = true; break; } // -
+        if (next == 12) { nextBad = true; break; } // sqrt
       break;
       
       case  7: //T
         nums[0]++;
         if (next ==  5) { nextBad = true; break; } // (
+        if (next == 11) { nextBad = true; break; } // -
+        if (next == 12) { nextBad = true; break; } // sqrt
       break;
 
       case  8: //Z
@@ -349,16 +353,22 @@ int invalidAt() { //Function to see if the un-decoded array follows the rules an
           if (i == 0) { return 1; } //To avoid StringIndexOutOfBoundsException on next line
           if (indices[i-1] !=  8) { nextBad = true; break; } //special case for only if the preceding digit is also 2
         }
+        if (next == 11) { nextBad = true; break; } // -
+        if (next == 12) { nextBad = true; break; } // sqrt
       break;
 
       case  9: //T
         nums[2]++;
         if (next ==  5) { nextBad = true; break; } // (
+        if (next == 11) { nextBad = true; break; } // -
+        if (next == 12) { nextBad = true; break; } // sqrt
       break;
 
       case 10: //T
         nums[3]++;
         if (next ==  5) { nextBad = true; break; } // (
+        if (next == 11) { nextBad = true; break; } // -
+        if (next == 12) { nextBad = true; break; } // sqrt
       break;
       
       case 11:  //-
@@ -378,6 +388,8 @@ int invalidAt() { //Function to see if the un-decoded array follows the rules an
       case 14:  //.d()
         if (next ==  5) { nextBad = true; break; } // (
         if (next>=7 && next<=10) { nextBad = true; break; } // nums
+        if (next == 11) { nextBad = true; break; } // -
+        if (next == 12) { nextBad = true; break; } // sqrt
       break;
     }
     
