@@ -1,0 +1,7 @@
+#!/bin/bash
+
+clear
+
+g++ TheYearGame.cpp -o TheYearGame -pthread -O3 -march=native
+
+./TheYearGame
