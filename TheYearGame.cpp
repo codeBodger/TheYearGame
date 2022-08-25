@@ -3,6 +3,7 @@
 #include <string> //stoi, etc
 #include <ctime> //timeing the program
 #include <cmath>
+#include <thread> //threads
 
 #include <math.h> //pow, sqrt ??
 #include <stack> //stacks in eval
@@ -30,6 +31,8 @@ int digits = 4;
 int digits_ = 3;
 
 int* indices;
+
+int* equArr;
 
 std::string equList[101];
 int badnessList[101];
@@ -103,20 +106,20 @@ double eval() {
     
     // Current token is an opening
     // brace, push it to 'ops'
-    if(indices[l] == 5) {
-      ops.push(indices[l]);
+    if(equArr[l] == 5) {
+      ops.push(equArr[l]);
     }
     
     // Current token is a number, push
     // it to stack for numbers.
-    else if(indices[l]>=7 && indices[l]<=10) {
+    else if(equArr[l]>=7 && equArr[l]<=10) {
       nval = 0;
        
       // There may be more than one
       // digits in number.
-      while(l < digits && indices[l]>=7 && indices[l]<=10)
+      while(l < digits && equArr[l]>=7 && equArr[l]<=10)
       {
-        nval = (nval*10) + yearDigits[indices[l] -7];
+        nval = (nval*10) + yearDigits[equArr[l] -7];
         l++;
       }
        
@@ -134,7 +137,7 @@ double eval() {
      
     // Closing brace encountered, solve
     // entire brace.
-    else if(indices[l] == 6)
+    else if(equArr[l] == 6)
     {
       while(!ops.empty() && ops.top() != 5)
       {
@@ -171,22 +174,22 @@ double eval() {
     }
     
     // Current token is fact/dfact
-    else if (indices[l] >= 13)
+    else if (equArr[l] >= 13)
     {
       eval2 = 0;
 
       eval1 = values.top();
       values.pop();
 
-      op = indices[l];
+      op = equArr[l];
 
       values.push(applyOp());
     }
 
     // Current token is -/sqrt
-    else if (indices[l] >= 11)
+    else if (equArr[l] >= 11)
     {
-      ops.push(indices[l]);
+      ops.push(equArr[l]);
     }
 
     // Current token is a binary operator.
@@ -196,7 +199,7 @@ double eval() {
       // precedence to current token, which
       // is an operator. Apply operator on top
       // of 'ops' to top two elements in values stack.
-      while(!ops.empty() && precedence(ops.top()) >= precedence(indices[l])) {
+      while(!ops.empty() && precedence(ops.top()) >= precedence(equArr[l])) {
         if (ops.top() <= 4)
         {
           eval2 = values.top();
@@ -225,7 +228,7 @@ double eval() {
       }
        
       // Push current token to 'ops'.
-      ops.push(indices[l]);
+      ops.push(equArr[l]);
     }
   }
    
@@ -452,30 +455,30 @@ int badness() {
   Nums[0] = false; Nums[1] = false; Nums[2] = false; Nums[3] = false;
   for (k = 0; k < digits_; k++)
   {
-    switch (indices[k])
+    switch (equArr[k])
     {
       case  7:
-        if (indices[k+1] >= 7 && indices[k+1] <= 10)
+        if (equArr[k+1] >= 7 && equArr[k+1] <= 10)
           doubles = true;
         Nums[0] = true;
       break;
       
       case  8:
-        if (indices[k+1] >= 7 && indices[k+1] <= 10)
+        if (equArr[k+1] >= 7 && equArr[k+1] <= 10)
           doubles = true;
         if (!Nums[0])
           order = true;
       break;
       
       case  9:
-        if (indices[k+1] >= 7 && indices[k+1] <= 10)
+        if (equArr[k+1] >= 7 && equArr[k+1] <= 10)
           doubles = true;
         if (!Nums[1])
           order = true;
       break;
       
       case 10:
-        if (indices[k+1] >= 7 && indices[k+1] <= 10)
+        if (equArr[k+1] >= 7 && equArr[k+1] <= 10)
           doubles = true;
         if (!Nums[2])
           order = true;
@@ -487,28 +490,37 @@ int badness() {
 }
 
 
-int inv;
 double val = -1;
 int ival;
 int bad;
 std::string equ;
 int j;
-int act() {
-  inv = invalidAt();
-  if (inv < digits) { return inv; }
-  
+void actThread() {
   val = eval();
   if (val >= 0 && val <= 100) {
     ival = trunc(val);
   if (ival == val) {
     bad = badness();
-  // std::cout << "  hi\n";
   if (bad < badnessList[ival]) {
-    equ = "";
-    for (j = 0; j < digits; j++) equ = equ + dic[indices[j]];
-    equList[ival] = "[" + std::to_string(ival) + "]\t[" + std::to_string(bad) + "]\t" + equ;
+    equ = "[" + std::to_string(ival) + "]\t[" + std::to_string(bad) + "]\t";
+    for (j = 0; j < digits; j++) equ = equ + dic[equArr[j]];
+    equList[ival] = equ;
     badnessList[ival] = bad;
   }}}
+}
+
+int inv;
+std::thread Thread;
+int act() {
+  inv = invalidAt();
+  if (inv < digits) { return inv; }
+
+  if (Thread.joinable())
+    Thread.join();
+
+  std::copy(indices, indices+digits, equArr);
+  // Thread(actThread);
+  Thread = std::thread(actThread);
 
   return digits;
 }
@@ -600,11 +612,17 @@ void draw() {
   for (n = 0; n < digits; n++) {
     indices[n] = 0;
   }
+
+  equArr = new int[digits];
+
   std::cout << digits << "\n";
 
   std::cout << "  Analysing ...\n";
 
   nFor();
+
+  if (Thread.joinable())
+    Thread.join();
 
   std::cout << "  Saving ...\n";
   saveData();
