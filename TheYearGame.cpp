@@ -468,6 +468,7 @@ int badness() {
           doubles = true;
         if (!Nums[0])
           order = true;
+        Nums[1] = true;
       break;
       
       case  9:
@@ -475,6 +476,7 @@ int badness() {
           doubles = true;
         if (!Nums[1])
           order = true;
+        Nums[2] = true;
       break;
       
       case 10:
@@ -482,6 +484,7 @@ int badness() {
           doubles = true;
         if (!Nums[2])
           order = true;
+        Nums[3] = true;
       break;
     }
   }
